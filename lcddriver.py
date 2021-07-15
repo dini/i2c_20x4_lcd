@@ -2,7 +2,7 @@ import i2c_lib
 from time import sleep
 
 # LCD Address
-#ADDRESS = 0x3F
+# ADDRESS = 0x3F
 ADDRESS = 0x27
 
 # I2C bus
@@ -50,73 +50,74 @@ LCD_5x8DOTS = 0x00
 LCD_BACKLIGHT = 0x08
 LCD_NOBACKLIGHT = 0x00
 
-En = 0b00000100 # Enable bit
-Rw = 0b00000010 # Read/Write bit
-Rs = 0b00000001 # Register select bit
+En = 0b00000100  # Enable bit
+Rw = 0b00000010  # Read/Write bit
+Rs = 0b00000001  # Register select bit
+
 
 class lcd:
-  """ 
-  Class to control the 16x2 I2C LCD display from sainsmart from the Raspberry Pi
-  """
+    """
+    Class to control the 16x2 I2C LCD display from sainsmart from the Raspberry Pi
+    """
 
-  def __init__(self, bus=BUS):
-    """Setup the display, turn on backlight and text display + ...?"""
-    self.device = i2c_lib.i2c_device(ADDRESS, bus)
+    def __init__(self, bus=BUS):
+        """Setup the display, turn on backlight and text display + ...?"""
+        self.device = i2c_lib.i2c_device(ADDRESS, bus)
 
-    self.write(0x03)
-    self.write(0x03)
-    self.write(0x03)
-    self.write(0x02)
+        self.write(0x03)
+        self.write(0x03)
+        self.write(0x03)
+        self.write(0x02)
 
-    self.write(LCD_FUNCTIONSET | LCD_2LINE | LCD_5x8DOTS | LCD_4BITMODE)
-    self.write(LCD_DISPLAYCONTROL | LCD_DISPLAYON)
-    self.write(LCD_CLEARDISPLAY)
-    self.write(LCD_ENTRYMODESET | LCD_ENTRYLEFT)
-#    self.write(LCD_ENTRYMODESET | LCD_ENTRYRIGHT | 0x00)
-    sleep(0.2)
+        self.write(LCD_FUNCTIONSET | LCD_2LINE | LCD_5x8DOTS | LCD_4BITMODE)
+        self.write(LCD_DISPLAYCONTROL | LCD_DISPLAYON)
+        self.write(LCD_CLEARDISPLAY)
+        self.write(LCD_ENTRYMODESET | LCD_ENTRYLEFT)
+        # self.write(LCD_ENTRYMODESET | LCD_ENTRYRIGHT | 0x00)
+        sleep(0.2)
 
-  def strobe(self, data):
-    """clocks EN to latch command"""
-    self.device.write_cmd(data | En | LCD_BACKLIGHT)
-    sleep(0.0005)
-    self.device.write_cmd(((data & ~En) | LCD_BACKLIGHT))
-    sleep(0.001)
+    def strobe(self, data):
+        """clocks EN to latch command"""
+        self.device.write_cmd(data | En | LCD_BACKLIGHT)
+        sleep(0.0005)
+        self.device.write_cmd(((data & ~En) | LCD_BACKLIGHT))
+        sleep(0.001)
 
-  def write_four_bits(self, data):
-    self.device.write_cmd(data | LCD_BACKLIGHT)
-    self.strobe(data)
+    def write_four_bits(self, data):
+        self.device.write_cmd(data | LCD_BACKLIGHT)
+        self.strobe(data)
 
-  def write(self, cmd, mode=0):
-    """write a command to lcd"""
-    self.write_four_bits(mode | (cmd & 0xF0))
-    self.write_four_bits(mode | ((cmd << 4) & 0xF0))
+    def write(self, cmd, mode=0):
+        """write a command to lcd"""
+        self.write_four_bits(mode | (cmd & 0xF0))
+        self.write_four_bits(mode | ((cmd << 4) & 0xF0))
 
-  def display_string(self, string, line):
-    if line == 1:
-       self.write(0x80)
-    if line == 2:
-       self.write(0xC0)
-    if line == 3:
-       self.write(0x94)
-    if line == 4:
-       self.write(0xD4)
+    def display_string(self, string, line):
+        if line == 1:
+            self.write(0x80)
+        if line == 2:
+            self.write(0xC0)
+        if line == 3:
+            self.write(0x94)
+        if line == 4:
+            self.write(0xD4)
 
-    for char in string:
-       self.write(ord(char), Rs)
+        for char in string:
+            self.write(ord(char), Rs)
 
-  def clear(self):
-    """clear lcd and set to home"""
-    self.write(LCD_CLEARDISPLAY)
-    self.write(LCD_RETURNHOME)
+    def clear(self):
+        """clear lcd and set to home"""
+        self.write(LCD_CLEARDISPLAY)
+        self.write(LCD_RETURNHOME)
 
-  def backlight_off(self):
-    """turn off backlight, anything that calls write turns it on again"""
-    self.device.write_cmd(LCD_NOBACKLIGHT)
+    def backlight_off(self):
+        """turn off backlight, anything that calls write turns it on again"""
+        self.device.write_cmd(LCD_NOBACKLIGHT)
 
-  def display_off(self):
-    """turn off the text display"""
-    self.write(LCD_DISPLAYCONTROL | LCD_DISPLAYOFF)
+    def display_off(self):
+        """turn off the text display"""
+        self.write(LCD_DISPLAYCONTROL | LCD_DISPLAYOFF)
 
-  def display_on(self):
-    """turn on the text display"""
-    self.write(LCD_DISPLAYCONTROL | LCD_DISPLAYON)
+    def display_on(self):
+        """turn on the text display"""
+        self.write(LCD_DISPLAYCONTROL | LCD_DISPLAYON)
