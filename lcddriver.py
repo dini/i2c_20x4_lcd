@@ -57,7 +57,8 @@ Rs = 0b00000001  # Register select bit
 
 class lcd:
     """
-    Class to control the 16x2 I2C LCD display from sainsmart from the Raspberry Pi
+    Class to control the 16x2 I2C LCD display from sainsmart from the
+    Raspberry Pi
     """
 
     def __init__(self, bus=BUS):

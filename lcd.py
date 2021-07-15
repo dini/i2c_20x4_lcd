@@ -32,18 +32,24 @@ def get_ext_ip():
 
 
 def loadind():
-    lcd.display_string("####################",1)
-    lcd.display_string("#SYSTEM  MONITORING#",2)
-    lcd.display_string("# LCD SERVICE LOAD #",3)
-    lcd.display_string("####################",4)
+    lcd.display_string("####################", 1)
+    lcd.display_string("#SYSTEM  MONITORING#", 2)
+    lcd.display_string("# LCD SERVICE LOAD #", 3)
+    lcd.display_string("####################", 4)
     sleep(10)
     lcd.clear()
     lcd.backlight_off()
 
 
 def refresh():
-    lcd.display_string("CPU:"+str(ps.cpu_percent()).rjust(4)+"%"+"  "+str(round(get_hwmon()/1000))+"C "+datetime.now().strftime('%d.%m'),1)
-    lcd.display_string("MEM:"+str(ps.virtual_memory()[2]).rjust(4)+"%"+"   "+datetime.now().strftime('%H:%M:%S'), 2)
+    cpu_percent = str(ps.cpu_percent()).rjust(4)
+    cpu_temp = str(round(get_hwmon()/1000))
+    date = datetime.now().strftime('%d.%m')
+    mem_percent = str(ps.virtual_memory()[2]).rjust(4)
+    time = datetime.now().strftime('%H:%M:%S')
+    lcd.display_string("CPU:" + cpu_percent + "%" + "  " + cpu_temp + "C " + date, 1)
+    lcd.display_string("MEM:" + mem_percent + "%" + "   " + time, 2)
+
 
 if __name__ == '__main__':
     systemd.daemon.notify('READY=1')
