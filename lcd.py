@@ -47,8 +47,12 @@ def refresh():
     date = datetime.now().strftime('%d.%m')
     mem_percent = str(ps.virtual_memory()[2]).rjust(4)
     time = datetime.now().strftime('%H:%M:%S')
-    lcd.display_string("CPU:" + cpu_percent + "%" + "  " + cpu_temp + "C " + date, 1)
-    lcd.display_string("MEM:" + mem_percent + "%" + "   " + time, 2)
+    lcd.display_string(
+        "CPU:" + cpu_percent + "%" + "  " + cpu_temp + "C " + date, 1
+        )
+    lcd.display_string(
+        "MEM:" + mem_percent + "%" + "   " + time, 2
+        )
 
 
 if __name__ == '__main__':
