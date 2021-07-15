@@ -24,7 +24,7 @@ def get_hwmon():
         data = f.read()
         return int(data)
 
-def get_ext_ip()
+def get_ext_ip():
     ip = get("https://api.ipify.org").text
     return ip
 
