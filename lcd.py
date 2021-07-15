@@ -1,20 +1,37 @@
-import lcddriver as lcd
-from time import time
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import lcddriver
 from time import sleep
 from datetime import datetime
-import sys
 import systemd.daemon
+import psutil as ps
+
+I2C_BUS = 1
+
+lcd = lcddriver.lcd(I2C_BUS)
+
+def get_hwmon():
+    with open('/sys/class/hwmon/hwmon0/temp1_input', 'r') as f:
+        data = f.read()
+        return int(data)
+
+def loadind():
+    lcd.display_string("####################",1)
+    lcd.display_string("#SYSTEM  MONITORING#",2)
+    lcd.display_string("# LCD SERVICE LOAD #",3)
+    lcd.display_string("####################",4)
+    sleep(10)
+    lcd.clear()
+    lcd.backlight_off()
+
+def refresh():
+    lcd.display_string("CPU:"+str(ps.cpu_percent()).rjust(4)+"%"+"  "+str(round(get_hwmon()/1000))+"C "+datetime.now().strftime('%d.%m'),1)
+    lcd.display_string("MEM:"+str(ps.virtual_memory()[2]).rjust(4)+"%"+"   "+datetime.now().strftime('%H:%M:%S'), 2)
 
 if __name__ == '__main__':
     systemd.daemon.notify('READY=1')
-    bus = 1
-    lcd = lcd.lcd(bus)
-    lcd.display_string("20x4 LCD Example", 1)
-    lcd.display_string("Hello ODROID", 2)
-
+    loadind()
     while True:
-        dateString = datetime.now().strftime('%b %d %y')
-        timeString = datetime.now().strftime('%H:%M:%S')
-        lcd.display_string(dateString, 3)
-        lcd.display_string(timeString, 4)
+        refresh()
         sleep(1)
