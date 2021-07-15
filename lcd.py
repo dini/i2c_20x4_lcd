@@ -6,15 +6,27 @@ from time import sleep
 from datetime import datetime
 import systemd.daemon
 import psutil as ps
+from requests import get
 
 I2C_BUS = 1
 
 lcd = lcddriver.lcd(I2C_BUS)
 
+display = [
+    "####################",
+    "####################",
+    "####################",
+    "####################",
+    ]
+
 def get_hwmon():
     with open('/sys/class/hwmon/hwmon0/temp1_input', 'r') as f:
         data = f.read()
         return int(data)
+
+def get_ext_ip()
+    ip = get("https://api.ipify.org").text
+    return ip
 
 def loadind():
     lcd.display_string("####################",1)
