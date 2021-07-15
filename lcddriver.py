@@ -1,3 +1,4 @@
+# pylint: disable=C0103, C0114, C0116
 from time import sleep
 import i2c_lib
 

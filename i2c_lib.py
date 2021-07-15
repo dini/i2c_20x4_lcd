@@ -1,10 +1,9 @@
+# pylint: disable=C0103, C0114, C0115, C0116, I1101
 import smbus
 
 
 class i2c_device:
-    """"""
     def __init__(self, addr, port=1):
-        """"""
         self.addr = addr
         self.bus = smbus.SMBus(port)
 
