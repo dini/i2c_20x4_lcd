@@ -1,0 +1,14 @@
+[Unit]
+Description=Display information
+
+[Service]
+WorkingDirectory=/home/dini/lcd
+Environment=VIRTUAL_ENV="/home/dini/lcd/.venv"
+Environment=PATH="$VIRTUAL_ENV/bin:$PATH"
+ExecStart=python lcd.py
+Restart=on-failure
+RestartSec=5s
+Type=notify
+
+[Install]
+WantedBy=default.target
