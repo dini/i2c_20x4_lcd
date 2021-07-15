@@ -19,14 +19,17 @@ display = [
     "####################",
     ]
 
+
 def get_hwmon():
     with open('/sys/class/hwmon/hwmon0/temp1_input', 'r') as f:
         data = f.read()
         return int(data)
 
+
 def get_ext_ip():
     ip = get("https://api.ipify.org").text
     return ip
+
 
 def loadind():
     lcd.display_string("####################",1)
@@ -36,6 +39,7 @@ def loadind():
     sleep(10)
     lcd.clear()
     lcd.backlight_off()
+
 
 def refresh():
     lcd.display_string("CPU:"+str(ps.cpu_percent()).rjust(4)+"%"+"  "+str(round(get_hwmon()/1000))+"C "+datetime.now().strftime('%d.%m'),1)
