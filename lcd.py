@@ -65,7 +65,7 @@ def get_hddtemp(host):
     return _cached['hddtemp' + host].value
 
 
-def hddtemp(host = '127.0.0.1'):
+def hddtemp(host='127.0.0.1'):
     """Parse hddtemp"""
     data = []
     drive_array = get_hddtemp(host).split("||")
