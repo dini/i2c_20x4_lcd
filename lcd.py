@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=C0103, C0114
 
-from time import sleep
+import time
+from collection import defaultdict
 from datetime import datetime
 import systemd.daemon
 import psutil as ps
@@ -12,36 +13,46 @@ import lcddriver
 
 I2C_BUS = 1
 
-lcd = lcddriver.lcd(I2C_BUS)
 
-display = [
-    "####################",
-    "####################",
-    "####################",
-    "####################",
-    ]
+class CachedValue(object):
+    def __init__(self):
+        self.timestamp = -1
+        self._value = None
+
+    @property 
+    def value(self):
+        return self._value
+
+    @value.setter 
+    def value(self, val):
+        self._value = val 
+        self.timestamp = time.time()
+
+    def isOld(self, seconds):
+        return (time.time() - self.timestamp) >= seconds
 
 
-def get_hwmon():
+def get_hwmon(self):
     """Get temp from hwmon"""
     with open('/sys/class/hwmon/hwmon0/temp1_input', 'r') as f:
         data = f.read()
         return int(data)
 
 
-def get_ext_ip():
+def get_ext_ip(self):
     """Get external IP"""
-    try:
-        ip = get("https://api.ipify.org").text
-    except:
-        ip = "No connection"
-    return ip
+    if self._cached['extip'].isOld(60):
+        try:
+            self._cached['extip'].value = get("https://api.ipify.org").text
+        except:
+            self._cached['extip'].value = "No connection"
+    return self._cached['extip'].value
 
 
-def get_hddtemp():
+def get_hddtemp(self, host):
     """Get temp from hddtemp"""
     conn = socket()
-    conn.connect(('127.0.0.1', 7634))
+    conn.connect((host, 7634))
     data = ''
     while True:
         buff = conn.recv(4096)
@@ -51,10 +62,10 @@ def get_hddtemp():
     return data
 
 
-def hddtemp():
+def hddtemp(self, host = '127.0.0.1'):
     """Parse hddtemp"""
     data = []
-    drive_array = get_hddtemp().split("||")
+    drive_array = get_hddtemp(host).split("||")
     for drive in drive_array:
         if drive[0] != "|":
             drive = "|" + drive
@@ -76,7 +87,7 @@ def loadind():
     lcd.display_string("#SYSTEM  MONITORING#", 2)
     lcd.display_string("# LCD SERVICE LOAD #", 3)
     lcd.display_string("####################", 4)
-    sleep(10)
+    time.sleep(10)
     lcd.clear()
     lcd.backlight_off()
 
@@ -105,7 +116,9 @@ def refresh():
 
 if __name__ == '__main__':
     systemd.daemon.notify('READY=1')
+    lcd = lcddriver.lcd(I2C_BUS)
     loadind()
+    _cached = defaultdict(CachedValue)
     while True:
         refresh()
-        sleep(1)
+        time.sleep(1)
