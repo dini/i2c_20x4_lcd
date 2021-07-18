@@ -19,14 +19,17 @@ class CachedValue(object):
         self.timestamp = -1
         self._value = None
 
+
     @property 
     def value(self):
         return self._value
+
 
     @value.setter 
     def value(self, val):
         self._value = val 
         self.timestamp = time.time()
+
 
     def isOld(self, seconds):
         return (time.time() - self.timestamp) >= seconds
