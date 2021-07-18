@@ -3,7 +3,7 @@
 # pylint: disable=C0103, C0114
 
 import time
-from collection import defaultdict
+from collections import defaultdict
 from datetime import datetime
 import systemd.daemon
 import psutil as ps
@@ -32,37 +32,40 @@ class CachedValue(object):
         return (time.time() - self.timestamp) >= seconds
 
 
-def get_hwmon(self):
+def get_hwmon():
     """Get temp from hwmon"""
-    with open('/sys/class/hwmon/hwmon0/temp1_input', 'r') as f:
-        data = f.read()
-        return int(data)
+    if _cached['hwmon'].isOld(10):
+        with open('/sys/class/hwmon/hwmon0/temp1_input', 'r') as f:
+            _cached['hwmon'].value = f.read()
+    return int(_cached['hwmon'].value)
 
 
-def get_ext_ip(self):
+def get_ext_ip():
     """Get external IP"""
-    if self._cached['extip'].isOld(60):
+    if _cached['extip'].isOld(60):
         try:
-            self._cached['extip'].value = get("https://api.ipify.org").text
+            _cached['extip'].value = get("https://api.ipify.org").text
         except:
-            self._cached['extip'].value = "No connection"
-    return self._cached['extip'].value
+            _cached['extip'].value = "No connection"
+    return _cached['extip'].value
 
 
-def get_hddtemp(self, host):
+def get_hddtemp(host):
     """Get temp from hddtemp"""
-    conn = socket()
-    conn.connect((host, 7634))
-    data = ''
-    while True:
-        buff = conn.recv(4096)
-        if not buff:
-            break
-        data += buff.decode()
-    return data
+    if _cached['hddtemp' + host].isOld(15):
+        conn = socket()
+        conn.connect((host, 7634))
+        data = ''
+        while True:
+            buff = conn.recv(4096)
+            if not buff:
+                break
+            data += buff.decode()
+        _cached['hddtemp' + host].value = data
+    return _cached['hddtemp' + host].value
 
 
-def hddtemp(self, host = '127.0.0.1'):
+def hddtemp(host = '127.0.0.1'):
     """Parse hddtemp"""
     data = []
     drive_array = get_hddtemp(host).split("||")
@@ -94,14 +97,15 @@ def loadind():
 
 def refresh():
     """Refresh function"""
-    cpu_percent = str(ps.cpu_percent()).rjust(4)
+    if _cached['cpu'].isOld(3):
+        _cached['cpu'].value = str(ps.cpu_percent()).rjust(4)
     cpu_temp = str(round(get_hwmon()/1000))
     date = datetime.now().strftime('%d.%m')
     mem_percent = str(ps.virtual_memory()[2]).rjust(4)
     time = datetime.now().strftime('%H:%M')
     hdd = hddtemp()
     lcd.display_string(
-        "CPU:" + cpu_percent + "%  " + cpu_temp + "C " + date, 1
+        "CPU:" + _cached['cpu'].value + "%  " + cpu_temp + "C " + date, 1
         )
     lcd.display_string(
         "MEM:" + mem_percent + "%      " + time, 2
