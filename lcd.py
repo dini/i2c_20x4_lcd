@@ -28,7 +28,6 @@ class CachedValue(object):
         self._value = val
         self.timestamp = time.time()
 
-
     def isOld(self, seconds):
         return (time.time() - self.timestamp) >= seconds
 
@@ -66,10 +65,10 @@ def get_hddtemp(host):
     return _cached['hddtemp' + host].value
 
 
-def hddtemp(host = '127.0.0.1'):
+def hddtemp(self.host = '127.0.0.1'):
     """Parse hddtemp"""
     data = []
-    drive_array = get_hddtemp(host).split("||")
+    drive_array = get_hddtemp(self.host).split("||")
     for drive in drive_array:
         if drive[0] != "|":
             drive = "|" + drive
