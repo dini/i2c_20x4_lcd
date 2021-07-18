@@ -9,6 +9,7 @@ import systemd.daemon
 import psutil as ps
 from socket import socket
 from requests import get
+from requests.exceptions import HTTPError
 import lcddriver
 
 I2C_BUS = 1
@@ -44,9 +45,14 @@ def get_ext_ip():
     """Get external IP"""
     if _cached['extip'].isOld(60):
         try:
-            _cached['extip'].value = get("https://api.ipify.org").text
-        except:
+            ip = get("https://api.ipify.org").text
+            ip.raise_for_status()
+        except HTTPError:
             _cached['extip'].value = "No connection"
+        except Exception:
+            _cached['extip'].value = "No connection"
+        else:
+            _cached['extip'].value = ip
     return _cached['extip'].value
 
 
